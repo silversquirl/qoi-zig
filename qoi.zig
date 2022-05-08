@@ -206,31 +206,6 @@ pub fn Encoder(comptime W: type) type {
             }
         }
 
-        fn diff(px: [4]u8, ppx: [4]u8) ?u6 {
-            return (dpx(px[0], ppx[0]) orelse return null) << 4 |
-                (dpx(px[1], ppx[1]) orelse return null) << 2 |
-                (dpx(px[2], ppx[2]) orelse return null);
-        }
-        fn dpx(c: u8, pc: u8) ?u6 {
-            if (pc > c) {
-                if (pc - c > 2) return null;
-                return 2 - @intCast(u2, pc - c);
-            } else {
-                if (c - pc > 1) return null;
-                return 2 + @intCast(u2, c - pc);
-            }
-        }
-
-        fn luma(px: [4]u8, ppx: [4]u8) ?Luma {
-            _ = px;
-            _ = ppx;
-            return null; // TODO
-        }
-        const Luma = struct {
-            g: u6,
-            rb: u8,
-        };
-
         pub fn writeEnd(self: Self) !void {
             if (self.run > 0) {
                 // Write the last RUN chunk
