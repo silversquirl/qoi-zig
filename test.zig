@@ -84,7 +84,8 @@ fn testEncode(comptime stem: []const u8) !void {
 
     const input = try std.fs.cwd().readFileAlloc(std.testing.allocator, path, 10 << 20);
     defer std.testing.allocator.free(input);
-    const img = try qoi.readAlloc(std.testing.allocator, std.io.fixedBufferStream(input).reader());
+    var stream = std.io.fixedBufferStream(input);
+    const img = try qoi.readAlloc(std.testing.allocator, stream.reader());
     defer std.testing.allocator.free(img.pixels);
 
     var buf = std.ArrayList(u8).init(std.testing.allocator);
@@ -105,9 +106,9 @@ fn expectEqualBytes(expected: []const u8, actual: []const u8) !void {
             const line_start = i & ~@as(usize, 15);
             const start = line_start -| 16;
             const end = line_start +| 2 * 16;
-            hexDump(start, expected[start..@minimum(end, expected.len)]);
+            hexDump(start, expected[start..@min(end, expected.len)]);
             std.debug.print("{s}\n", .{"-" ** 69});
-            hexDump(start, actual[start..@minimum(end, actual.len)]);
+            hexDump(start, actual[start..@min(end, actual.len)]);
 
             return error.TestExpectedEqual;
         }
@@ -135,7 +136,7 @@ fn hexDump(offset: usize, bytes: []const u8) void {
         }
 
         std.debug.print("  ", .{});
-        for (bytes[base..@minimum(end, bytes.len)]) |b| {
+        for (bytes[base..@min(end, bytes.len)]) |b| {
             std.debug.print("{c}", .{
                 if (std.ascii.isPrint(b)) b else '.',
             });
